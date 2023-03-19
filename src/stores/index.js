@@ -33,26 +33,45 @@ export const useHomeStore = defineStore("counter",
             let returnValue = ""
             await axios.post("/path/api/userlogin", data)
                 .then(res => {
-                    // todo 加入返回code码判断
                     if (res.data.code === 0) {
                         // 成功
                         let info = ParseToken(res.data.data)
                         setUserInfo(info)
                         console.log(userInfo)
-                        infoFunc("登陆成功")
+                        infoFunc(res.data.msg)
                         returnValue = res.data
                     } else {
                         // 失败
                         returnValue = res.data
+                        warnFunc(res.data.msg)
                     }
                 })
             return returnValue
         }
+        async function userRegister(data) {
+            let returnValue = ""
+            await axios.post("/path/api/userregister", data)
+                .then(res => {
+                    if (res.data.code === 0) {
+                        // success
+                        infoFunc(res.data.msg)
+                        console.log(res.data)
+                        returnValue = res.data
+                    } else {
+                        // failed
+                        returnValue = res.data
+                        warnFunc(res.data.msg)
+                    }
+                })
+            return returnValue
+        }
+
         // todo 清除jwt登录状态
         // 加载jwt登录状态
         function loadUserInfo() {
             let info = localStorage.getItem("userInfo")
             if (info === null) {
+                warnFunc("请登录")
                 return
             }
             // 先json解析
@@ -68,6 +87,7 @@ export const useHomeStore = defineStore("counter",
 
             // 已登录
             console.log("未过期 " + userInfo)
+            push({path: 'page'})
             return true
 
         }
@@ -78,15 +98,15 @@ export const useHomeStore = defineStore("counter",
             warnMsg.value = msg
             setTimeout(() => {
                 warnStatus.value = !warnStatus.value
-                console.log(warnStatus.value)
             }, 100) // 延迟恢复初始值
         }
+
         // 提示信息
         function infoFunc(msg) {
             infoStatus.value = !infoStatus.value
             infoMsg.value = msg
             setTimeout(() => {
-                infoStatus.value =!infoStatus.value
+                infoStatus.value = !infoStatus.value
             }, 100) // 延迟恢复初始值
         }
 
@@ -96,6 +116,7 @@ export const useHomeStore = defineStore("counter",
                 console.log(obj)
             })
         }
+
         return {
             userLogin: userLogin,
             loadUserInfo: loadUserInfo,
@@ -104,5 +125,6 @@ export const useHomeStore = defineStore("counter",
             infoStatus: infoStatus,
             infoMsg: infoMsg,
             push: push,
+            userRegister: userRegister,
         }
     })
