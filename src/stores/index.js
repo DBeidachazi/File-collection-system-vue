@@ -126,5 +126,6 @@ export const useHomeStore = defineStore("counter",
             infoMsg: infoMsg,
             push: push,
             userRegister: userRegister,
+            userInfo: userInfo,
         }
     })
