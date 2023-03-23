@@ -55,8 +55,8 @@
                     <figure><img alt="Shoes" src="/src/assets/任务完成.svg"/></figure>
                     <div class="card-body">
                         <h2 class="card-title">我的任务</h2>
-                        <p v-if="true">您的任务已全部完成</p>
-                        <p v-if="false">您有 {{ }} 条任务待完成</p>
+                        <p v-if="notHaveRole">您的任务已全部完成</p>
+                        <p v-if="haveRole">您有 {{ roleNumber }} 条任务待完成</p>
                         <div class="card-actions justify-end">
                             <button class="btn btn-success" @click="goToMyRole">查看</button>
                         </div>
@@ -77,30 +77,92 @@
                 <!-- Sidebar content here -->
 
                 <li><a @click="pageStore.backToHomePage()">Home</a></li>
-                <li><a>班级管理</a></li>
+                <li><a @click="classManage">班级管理</a></li>
                 <li><a class="" @click="logOut">Log Out</a></li>
             </ul>
 
         </div>
     </div>
 
+
 </template>
 
 <script setup>
 import {useHomeStore} from "../../stores/index.js";
 import {usePageStore} from "../../stores/page.js";
-import {onBeforeMount} from "vue";
+import {onBeforeMount, reactive, ref} from "vue";
 import Submit from "./submit/Submit.vue";
+import axios from "axios";
+
 const homeStore = useHomeStore()
 const pageStore = usePageStore()
 
-onBeforeMount(() => {
-    homeStore.loadUserInfo()
+let roleResp = reactive({})
+let notHaveRole = ref(true) // 没有未完成的任务
+let haveRole = ref(false) // 有未完成的任务
+let roleNumber = ref(0)
+async function sendRoleRespToPage() {
+    await axios.post("/path/api/searchrole",
+        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id} )
+        .then(({data}) => {
+            // todo 替换status数字为具体内容
+            for (let i = 0; i < data.data.length; i++) {
+                if (data.data[i].status === 2) {
+                    data.data[i].status = "未完成"
+                } else if (data.data[i].status === 1) {
+                    data.data[i].status = "已完成"
+                }
+            }
+            roleResp = data
 
+            // finished
+            let  roleRespFinished  = JSON.parse(JSON.stringify(data))
+            for (let i = 0; i < roleRespFinished.data.length; i++) {
+                if (roleRespFinished.data[i].status === "未完成") {
+                    roleRespFinished.data.splice(i, 1)
+                    i--
+                }
+            }
+            pageStore.roleRespFinished = roleRespFinished
+
+            // unfinished
+            let  roleRespUnFinished  = JSON.parse(JSON.stringify(data))
+            for (let i = 0; i < roleRespFinished.data.length; i++) {
+                if (roleRespUnFinished.data[i].status === "已完成") {
+                    roleRespUnFinished.data.splice(i, 1)
+                    i--
+                }
+            }
+            pageStore.roleRespUnFinished = roleRespUnFinished
+
+            // 未完成任务的数量
+            roleNumber.value = roleRespUnFinished.data.length
+
+            if (roleResp.code === 1) {
+                console.log("没有任务")
+            } else {
+                console.log("有任务")
+                pageStore.roleResp = roleResp
+                haveRole.value = true
+                notHaveRole.value = false
+            }
+
+
+        })
+}
+
+onBeforeMount( () => {
+    homeStore.loadUserInfo()
+    sendRoleRespToPage() // 给我的任务页面使用
 })
+
 
 function goToMyRole() {
     pageStore.roleChange()
+}
+
+function classManage() {
+    homeStore.push({path: '/class_manage'})
 }
 
 
