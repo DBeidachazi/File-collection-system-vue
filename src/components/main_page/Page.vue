@@ -38,6 +38,7 @@
                 </div>
             </div>
 
+<!--            inside-->
             <div v-if="pageStore.content" class="flex max-h-72 my-12">
                 <div class="card lg:card-side bg-base-100 shadow-xl w-3/5 mx-8">
                     <figure><img alt="Album" src="/src/assets/任务完成.svg"/></figure>
@@ -45,7 +46,7 @@
                         <h2 class="card-title">我发布的</h2>
                         <p>在这里查看发布作业提交情况</p>
                         <div class="card-actions justify-end">
-                            <button class="btn btn-info">查看</button>
+                            <button class="btn btn-info" @click="goToPublished">查看</button>
                         </div>
                     </div>
                 </div>
@@ -69,6 +70,10 @@
                 <Submit></Submit>
             </div>
 
+            <div v-if="pageStore.published">
+                <Worklist></Worklist>
+            </div>
+
         </div>
         <!--        侧边栏-->
         <div class="drawer-side">
@@ -77,8 +82,8 @@
                 <!-- Sidebar content here -->
 
                 <li><a @click="pageStore.backToHomePage()">Home</a></li>
-                <li><a @click="classManage">班级管理</a></li>
-                <li><a class="" @click="logOut">Log Out</a></li>
+                <li><a @click="homeStore.classManage">Class Manage</a></li>
+                <li><a class="" @click="homeStore.logOut">Log Out</a></li>
             </ul>
 
         </div>
@@ -91,21 +96,31 @@
 import {useHomeStore} from "../../stores/index.js";
 import {usePageStore} from "../../stores/page.js";
 import {onBeforeMount, reactive, ref} from "vue";
-import Submit from "./submit/Submit.vue";
+import Submit from "./home/Submit.vue";
 import axios from "axios";
+import Worklist from "./home/Worklist.vue";
 
 const homeStore = useHomeStore()
 const pageStore = usePageStore()
 
 let roleResp = reactive({})
+let worklistResp = reactive({})
 let notHaveRole = ref(true) // 没有未完成的任务
 let haveRole = ref(false) // 有未完成的任务
 let roleNumber = ref(0)
+async function sendWorklistRespToPage() {
+    await axios.post("/path/api/searchworklist",
+        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id})
+        .then(({data}) => {
+            console.log(data.msg)
+            worklistResp = data
+            pageStore.worklistResp = worklistResp
+        })
+}
 async function sendRoleRespToPage() {
     await axios.post("/path/api/searchrole",
         {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id} )
         .then(({data}) => {
-            // todo 替换status数字为具体内容
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].status === 2) {
                     data.data[i].status = "未完成"
@@ -154,22 +169,22 @@ async function sendRoleRespToPage() {
 onBeforeMount( () => {
     homeStore.loadUserInfo()
     sendRoleRespToPage() // 给我的任务页面使用
+    sendWorklistRespToPage()
 })
 
 
 function goToMyRole() {
     pageStore.roleChange()
 }
-
-function classManage() {
-    homeStore.push({path: '/class_manage'})
+function goToPublished() {
+    pageStore.publishChange()
 }
 
+// function classManage() {
+//     homeStore.push({path: '/class_manage'})
+// }
 
 
 
-function logOut() {
-    localStorage.removeItem("userInfo")
-    homeStore.push({path: '/'})
-}
+
 </script>

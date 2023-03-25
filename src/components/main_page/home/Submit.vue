@@ -58,7 +58,7 @@
                 <th>{{ respObj.status }}</th>
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
                 <th>
-                    <button class="btn btn-ghost btn-x">提交</button>
+                    <button class="btn btn-ghost btn-xl">提交</button>
                 </th>
 
             </tr>

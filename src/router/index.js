@@ -2,12 +2,18 @@ import {createRouter, createWebHashHistory} from 'vue-router'
 import Home from "../view/Home.vue";
 import Register from "../components/home_page/Register.vue";
 import Page from "../components/main_page/Page.vue";
-import Class from "../components/main_page/class_manage/Class.vue";
+import Class from "../components/main_page/Class.vue";
+import Blank from "../components/blank/Blank.vue";
 const routes = [
     {
         path: '/',
         name: 'home',
         component: Home
+    },
+    {
+      path: '/blank',
+      name: 'blank',
+      component: Blank
     },
     {
         path: '/register',

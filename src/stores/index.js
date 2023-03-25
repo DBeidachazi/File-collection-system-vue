@@ -5,7 +5,7 @@ import {reactive, ref} from "vue";
 import router from "../router/index.js";
 
 // setupStore
-export const useHomeStore = defineStore("counter",
+export const useHomeStore = defineStore("homeStore",
     () => {
         let warnStatus = ref(false)
         let infoStatus = ref(false)
@@ -66,7 +66,6 @@ export const useHomeStore = defineStore("counter",
             return returnValue
         }
 
-        // todo 清除jwt登录状态
         // 加载jwt登录状态
         function loadUserInfo() {
             let info = localStorage.getItem("userInfo")
@@ -78,7 +77,6 @@ export const useHomeStore = defineStore("counter",
             let userInfo = JSON.parse(info)
             let exp = userInfo.exp
             let nowTime = new Date().getTime()
-            // fixme 无法使用计算
             if (((exp * 1000) - nowTime) <= 0) {
                 // 过期了
                 warnFunc("当前登录已失效")
@@ -113,19 +111,30 @@ export const useHomeStore = defineStore("counter",
 
         function push(obj) {
             router.push(obj).then(() => {
-                console.log(obj)
+                // console.log(obj)
             })
         }
 
+        function classManage() {
+            push({path: '/class_manage'})
+        }
+        function logOut() {
+            localStorage.removeItem("userInfo")
+            push({path: '/'})
+        }
+
         return {
-            userLogin: userLogin,
-            loadUserInfo: loadUserInfo,
-            warnStatus: warnStatus,
-            warnMsg: warnMsg,
-            infoStatus: infoStatus,
-            infoMsg: infoMsg,
-            push: push,
-            userRegister: userRegister,
-            userInfo: userInfo,
+            userLogin,
+            loadUserInfo,
+            push,
+            classManage,
+            userRegister,
+            logOut,
+
+            warnStatus,
+            warnMsg,
+            infoStatus,
+            infoMsg,
+            userInfo,
         }
     })
