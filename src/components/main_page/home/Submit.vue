@@ -58,7 +58,8 @@
                 <th>{{ respObj.status }}</th>
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
                 <th>
-                    <button class="btn btn-ghost btn-xl">提交</button>
+<!--                    @click 清空选择文件-->
+                    <input ref="file" @click="e => {e.target.value = '';}" type="file" @change="uploadFile(respObj)" class="file-input file-input-ghost w-full max-w-xs" />
                 </th>
 
             </tr>
@@ -82,6 +83,7 @@
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
                 <th>
                     <button class="btn btn-ghost btn-x">提交</button>
+<!--                    <input type="file" class="file-input file-input-ghost w-full max-w-xs" />-->
                 </th>
             </tr>
 
@@ -98,6 +100,20 @@ import {usePageStore} from "../../../stores/page.js";
 import {onMounted, ref} from "vue";
 
 let pageStore = usePageStore()
+
+// declare a ref to hold the element reference
+// the name must match template ref value
+const file = ref(null)
+function uploadFile(respObj) {
+    // todo 上传file
+    console.log(respObj)
+    console.log(file.value)
+}
+
+// let stu_id = JSON.parse(localStorage.getItem("user")).stu_id
+// function changeAction(respObj) {
+//     action.value = "/path/api/upload/" + respObj.class_id + "/" + stu_id + "/" + respObj.course_id
+// }
 
 
 onMounted(() => {

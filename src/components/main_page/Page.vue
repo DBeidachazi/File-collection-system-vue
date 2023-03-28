@@ -38,7 +38,7 @@
                 </div>
             </div>
 
-<!--            inside-->
+            <!--            inside-->
             <div v-if="pageStore.content" class="flex max-h-72 my-12">
                 <div class="card lg:card-side bg-base-100 shadow-xl w-3/5 mx-8">
                     <figure><img alt="Album" src="/src/assets/任务完成.svg"/></figure>
@@ -64,6 +64,26 @@
                     </div>
                 </div>
             </div>
+
+            <div v-if="pageStore.content" class=" flex-none px-36">
+                <div class="card lg:card-side bg-base-100 shadow-xl px-24 max-h-64">
+                    <figure><img alt="Album" src="../../assets/任务完成.svg"/></figure>
+                    <div class="card-body">
+                        <h2 class="card-title">加入班级</h2>
+                        <p>请输入班级号加入班级</p>
+                        <input v-model="classId" class="input input-ghost w-full max-w-xs" placeholder="请输入班级号"
+                               type="text"/>
+                        <div class="card-actions justify-end">
+                            <button class="btn btn-primary" @click="addToClass">加入</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed bottom-2.5">
+                <i class="nes-octocat animate"></i>
+            </div>
+
 
             <!--            其他组件-->
             <div v-if="pageStore.role">
@@ -103,11 +123,24 @@ import Worklist from "./home/Worklist.vue";
 const homeStore = useHomeStore()
 const pageStore = usePageStore()
 
+let classId = ref("")
+
+function addToClass() {
+    let stuId = JSON.parse(localStorage.getItem("userInfo"))
+    let data = {
+        classId: Number(classId.value),
+        stuId: Number(stuId.stu_id)
+    }
+    homeStore.addToClass(data)
+    classId.value = ""
+}
+
 let roleResp = reactive({})
 let worklistResp = reactive({})
 let notHaveRole = ref(true) // 没有未完成的任务
 let haveRole = ref(false) // 有未完成的任务
 let roleNumber = ref(0)
+
 async function sendWorklistRespToPage() {
     await axios.post("/path/api/searchworklist",
         {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id})
@@ -117,9 +150,10 @@ async function sendWorklistRespToPage() {
             pageStore.worklistResp = worklistResp
         })
 }
+
 async function sendRoleRespToPage() {
     await axios.post("/path/api/searchrole",
-        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id} )
+        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id})
         .then(({data}) => {
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].status === 2) {
@@ -131,7 +165,7 @@ async function sendRoleRespToPage() {
             roleResp = data
 
             // finished
-            let  roleRespFinished  = JSON.parse(JSON.stringify(data))
+            let roleRespFinished = JSON.parse(JSON.stringify(data))
             for (let i = 0; i < roleRespFinished.data.length; i++) {
                 if (roleRespFinished.data[i].status === "未完成") {
                     roleRespFinished.data.splice(i, 1)
@@ -141,7 +175,7 @@ async function sendRoleRespToPage() {
             pageStore.roleRespFinished = roleRespFinished
 
             // unfinished
-            let  roleRespUnFinished  = JSON.parse(JSON.stringify(data))
+            let roleRespUnFinished = JSON.parse(JSON.stringify(data))
             for (let i = 0; i < roleRespFinished.data.length; i++) {
                 if (roleRespUnFinished.data[i].status === "已完成") {
                     roleRespUnFinished.data.splice(i, 1)
@@ -166,7 +200,7 @@ async function sendRoleRespToPage() {
         })
 }
 
-onBeforeMount( () => {
+onBeforeMount(() => {
     homeStore.loadUserInfo()
     sendRoleRespToPage() // 给我的任务页面使用
     sendWorklistRespToPage()
@@ -176,6 +210,7 @@ onBeforeMount( () => {
 function goToMyRole() {
     pageStore.roleChange()
 }
+
 function goToPublished() {
     pageStore.publishChange()
 }
@@ -183,8 +218,6 @@ function goToPublished() {
 // function classManage() {
 //     homeStore.push({path: '/class_manage'})
 // }
-
-
 
 
 </script>

@@ -109,8 +109,8 @@ export const useHomeStore = defineStore("homeStore",
         }
 
 
-        function push(obj) {
-            router.push(obj).then(() => {
+        async function push(obj) {
+            await router.push(obj).then(() => {
                 // console.log(obj)
             })
         }
@@ -123,6 +123,14 @@ export const useHomeStore = defineStore("homeStore",
             push({path: '/'})
         }
 
+
+        function addToClass(data) {
+            axios.post("/path/api/classusercreate", data)
+                .then(res => {
+                    console.log(res)
+                })
+        }
+
         return {
             userLogin,
             loadUserInfo,
@@ -130,6 +138,8 @@ export const useHomeStore = defineStore("homeStore",
             classManage,
             userRegister,
             logOut,
+            addToClass,
+
 
             warnStatus,
             warnMsg,

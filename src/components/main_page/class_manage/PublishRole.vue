@@ -1,5 +1,6 @@
 <template>
-    <div  class="overflow-x-auto m-12">
+
+    <div class="overflow-x-auto m-12">
         <div>
             <div class="text-sm breadcrumbs">
                 <ul>
@@ -25,7 +26,42 @@
             </div>
 
 
+            <div v-if="!showPublicRole" class="font-bold text-2xl flex justify-center items-center py-12">
+                您还没有管理的班级
+            </div>
 
+            <div v-if="showPublicRole" class="flex flex-col justify-center items-center">
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">课程名</span>
+                    </label>
+                    <input v-model="courseName" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+                </div>
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">班级选择</span>
+                    </label>
+                    <select v-model="classId" class="select select-bordered">
+                        <option v-for="respObj in classStore.searchClassResp.data">{{ respObj.class_user.class_id }}</option>
+                    </select>
+                </div>
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">老师名称</span>
+                    </label>
+                    <input v-model="userName" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+                </div>
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">文件类型</span>
+                    </label>
+                    <input v-model="fileType" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+                </div> <br>
+
+                <el-date-picker v-model="deadline" value-format="YYYY-MM-DD HH:mm:ss" type="datetime" placeholder="Select date and time"/> <br>
+
+                <button @click="submit" class="btn btn-active btn-secondary btn-wide">提交</button>
+            </div>
 
         </div>
     </div>
@@ -33,7 +69,36 @@
 </template>
 
 <script setup>
+import {onBeforeMount, ref} from "vue";
 import {useClassManageStore} from "../../../stores/classManage.js";
 const classStore = useClassManageStore()
 
+let stuId = Number(JSON.parse(localStorage.getItem('userInfo')).stu_id)
+let courseName = ref('')
+let userName = ref('')
+let deadline = ref('')
+let fileType = ref('')
+let classId = ref('')
+
+// 查看用户是否有管理的班级
+let showPublicRole = ref(true)
+onBeforeMount(() => {
+    if (classStore.searchClassResp.code === 1) {
+        showPublicRole.value = false
+    }
+})
+
+
+function submit() {
+    classStore.courseCreate(
+        {
+            stuId: stuId,
+            classId: Number(classId.value),
+            courseName: courseName.value,
+            username: userName.value,
+            deadline: deadline.value,
+            fileType: fileType.value
+        }
+    )
+}
 </script>

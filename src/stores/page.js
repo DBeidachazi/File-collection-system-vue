@@ -32,7 +32,6 @@ export const usePageStore = defineStore("pageStore",() => {
         role.value = false
         published.value = false
         router.push({path: '/page'}).then(()=>{})
-        // todo 补充
     }
 
 

@@ -2,7 +2,7 @@
 
     <div class=" drawer drawer-mobile">
         <input id="my-drawer-2" class="drawer-toggle" type="checkbox"/>
-        <div class="drawer-content ">
+        <div class="drawer-content">
             <!-- Page content here -->
             <!--            navbar-->
             <div class=" navbar bg-base-200">
@@ -64,8 +64,12 @@
             </div>
 
             <!--            其他组件-->
-            <div v-if="classStore.classManage">
-                   <ClassManage></ClassManage>
+            <div v-if="classStore.classManage" >
+                   <ClassManage @searchClass="searchClass" class=""></ClassManage>
+            </div>
+
+            <div v-if="classStore.classManageStudents">
+                <ClassStudentManage></ClassStudentManage>
             </div>
 
             <div v-if="classStore.publishRole">
@@ -97,6 +101,7 @@ import ClassManage from "./class_manage/ClassManage.vue";
 import PublishRole from "./class_manage/PublishRole.vue";
 import {onBeforeMount} from "vue";
 import axios from "axios";
+import ClassStudentManage from "./class_manage/ClassStudentManage.vue";
 const classStore = useClassManageStore()
 const homeStore = useHomeStore()
 const pageStore = usePageStore()
@@ -107,8 +112,11 @@ onBeforeMount(() => {
 })
 
 async function searchClass() {
+    // 重新parseStuId
+    classStore.getStuIdFunc()
     await axios.post("/path/api/classsearch", {"stu_id": classStore.getStuId})
         .then(({data}) => {
+            console.log(data)
             classStore.searchClassResp = data
         })
 }
@@ -119,8 +127,4 @@ function goToClassManage() {
 function goToPublishRole() {
     classStore.publishRoleChange()
 }
-
-
-
-
 </script>
