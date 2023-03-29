@@ -45,21 +45,23 @@
                 <th>班级ID</th>
                 <th>完成状态</th>
                 <th>截止时间</th>
+                <th>文件类型</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
 
-            <tr v-show="allTable" v-for="respObj in pageStore.roleResp.data">
+            <tr v-show="allTable" v-for="(respObj, index) in pageStore.roleResp.data">
                 <th>{{ respObj.role_id }}</th>
                 <th>{{ respObj.role_name }}</th>
                 <th>{{ respObj.course_id }}</th>
                 <th>{{ respObj.class_id }}</th>
                 <th>{{ respObj.status }}</th>
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
+                <th>{{ respObj.file_type }}</th>
                 <th>
 <!--                    @click 清空选择文件-->
-                    <input ref="file" @click="e => {e.target.value = '';}" type="file" @change="uploadFile(respObj)" class="file-input file-input-ghost w-full max-w-xs" />
+                    <input ref="file" @click="e => {e.target.value = '';}" type="file" @change="uploadFile(respObj, index)" class="file-input file-input-ghost w-full max-w-xs" />
                 </th>
 
             </tr>
@@ -70,8 +72,9 @@
                 <th>{{ respObj.class_id }}</th>
                 <th>{{ respObj.status }}</th>
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
+                <th>{{ respObj.file_type }}</th>
                 <th>
-                    <button class="btn btn-ghost btn-x">提交</button>
+                    <input ref="file" @click="e => {e.target.value = '';}" type="file" @change="uploadFile(respObj, index)" class="file-input file-input-ghost w-full max-w-xs" />
                 </th>
             </tr>
             <tr v-show="unFinishedTable" v-for="respObj in pageStore.roleRespUnFinished.data">
@@ -81,9 +84,9 @@
                 <th>{{ respObj.class_id }}</th>
                 <th>{{ respObj.status }}</th>
                 <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
+                <th>{{ respObj.file_type }}</th>
                 <th>
-                    <button class="btn btn-ghost btn-x">提交</button>
-<!--                    <input type="file" class="file-input file-input-ghost w-full max-w-xs" />-->
+                    <input ref="file" @click="e => {e.target.value = '';}" type="file" @change="uploadFile(respObj, index)" class="file-input file-input-ghost w-full max-w-xs" />
                 </th>
             </tr>
 
@@ -97,28 +100,79 @@
 
 <script setup>
 import {usePageStore} from "../../../stores/page.js";
-import {onMounted, ref} from "vue";
+import {reactive, ref} from "vue";
+import axios from "axios";
 
 let pageStore = usePageStore()
 
 // declare a ref to hold the element reference
 // the name must match template ref value
 const file = ref(null)
-function uploadFile(respObj) {
-    // todo 上传file
-    console.log(respObj)
-    console.log(file.value)
+
+let roleResp = reactive({})
+
+async function searchRole() {
+    await axios.post("/path/api/searchrole",
+        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id})
+        .then(
+            ({data}) => {
+                for (let i = 0; i < data.data.length; i++) {
+                    if (data.data[i].status === 2) {
+                        data.data[i].status = "未完成"
+                    } else if (data.data[i].status === 1) {
+                        data.data[i].status = "已完成"
+                    }
+                }
+                roleResp = data
+
+                // finished
+                let roleRespFinished = JSON.parse(JSON.stringify(data))
+                for (let i = 0; i < roleRespFinished.data.length; i++) {
+                    if (roleRespFinished.data[i].status === "未完成") {
+                        roleRespFinished.data.splice(i, 1)
+                        i--
+                    }
+                }
+                pageStore.roleRespFinished = roleRespFinished
+
+                // unfinished
+                let roleRespUnFinished = JSON.parse(JSON.stringify(data))
+                // todo 为什么先打印的会是后面的代码执行后的结果
+                console.log(roleRespUnFinished)
+                for (let i = 0; i < roleRespUnFinished.data.length; i++) {
+                    if (roleRespUnFinished.data[i].status === "已完成") {
+                        roleRespUnFinished.data.splice(i, 1)
+                        i--
+                    }
+                }
+                pageStore.roleRespUnFinished = roleRespUnFinished
+
+                pageStore.roleResp = roleResp
+
+                // todo page页面我的任务内容更改
+            })
 }
+async function uploadFile(respObj, index) {
+    // todo 上传file
+    // console.log(respObj)
+    let postFile = file.value[index].files[0]
+    console.log(postFile)
 
-// let stu_id = JSON.parse(localStorage.getItem("user")).stu_id
-// function changeAction(respObj) {
-//     action.value = "/path/api/upload/" + respObj.class_id + "/" + stu_id + "/" + respObj.course_id
-// }
+    let fileType = pageStore.roleResp.data[index].file_type
+    let splitFileType = postFile.name.split('.')
+    splitFileType = splitFileType[splitFileType.length - 1]
+    if (splitFileType !== fileType) {
+        console.log(splitFileType + "不是" + fileType + "类型")
+        return
+    }
 
+    let form = new FormData()
+    form.append("file", postFile)
 
-onMounted(() => {
+    await pageStore.fileUpload(respObj, form)
 
-})
+    searchRole()
+}
 
 let allTable = ref(true)
 let finishedTable = ref(false)

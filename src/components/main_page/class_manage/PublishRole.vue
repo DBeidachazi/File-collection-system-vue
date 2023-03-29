@@ -89,8 +89,8 @@ onBeforeMount(() => {
 })
 
 
-function submit() {
-    classStore.courseCreate(
+async function submit() {
+    await classStore.courseCreate(
         {
             stuId: stuId,
             classId: Number(classId.value),
@@ -100,5 +100,11 @@ function submit() {
             fileType: fileType.value
         }
     )
+
+    courseName.value = ''
+    userName.value = ''
+    deadline.value = ''
+    fileType.value = ''
+    classId.value = ''
 }
 </script>

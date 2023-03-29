@@ -35,6 +35,7 @@
                 <th>提交人数</th>
                 <th>截止时间</th>
                 <th></th>          <!-- 下载 -->
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -44,7 +45,10 @@
                     <th>{{ respObj.status }}</th>
                     <th>{{ respObj.deadline.replace("T", " ").replace("+08:00", "") }}</th>
                     <th>
-                        <button class="btn btn-ghost btn-xl">下载</button>
+                        <button @click="downloadCourse(respObj)" class="btn btn-ghost btn-xl">下载</button>
+                    </th>
+                    <th>
+                        <button @click="deleteCourse(respObj)" class="btn btn-ghost btn-xl">删除</button>
                     </th>
                 </tr>
             </tbody>
@@ -54,6 +58,37 @@
 
 <script setup>
 import {usePageStore} from "../../../stores/page.js";
+import axios from "axios";
+import {reactive} from "vue";
 const pageStore = usePageStore()
+
+let worklistResp = reactive({})
+
+const sendWorklistRespToPage = () => {
+    axios.post("/path/api/searchworklist",
+        {stu_id: JSON.parse(localStorage.getItem("userInfo")).stu_id})
+        .then(({data}) => {
+            console.log(data.msg)
+            worklistResp = data
+            pageStore.worklistResp = worklistResp
+        })
+}
+
+const deleteCourse = async (respObj) => {
+    await pageStore.deleteCourse({
+        course_id: respObj.course_id
+    })
+
+    sendWorklistRespToPage()
+}
+
+const downloadCourse = async (respObj) => {
+    console.log(respObj)
+    await pageStore.downloadCourse({
+        courseId: respObj.course_id,
+        stuId: respObj.stu_id,
+        classId: respObj.class_id
+    })
+}
 
 </script>

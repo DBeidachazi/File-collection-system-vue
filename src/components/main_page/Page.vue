@@ -164,6 +164,7 @@ async function sendRoleRespToPage() {
             }
             roleResp = data
 
+
             // finished
             let roleRespFinished = JSON.parse(JSON.stringify(data))
             for (let i = 0; i < roleRespFinished.data.length; i++) {
@@ -176,7 +177,9 @@ async function sendRoleRespToPage() {
 
             // unfinished
             let roleRespUnFinished = JSON.parse(JSON.stringify(data))
-            for (let i = 0; i < roleRespFinished.data.length; i++) {
+            // todo 为什么先打印的会是后面的代码执行后的结果
+            console.log(roleRespUnFinished)
+            for (let i = 0; i < roleRespUnFinished.data.length; i++) {
                 if (roleRespUnFinished.data[i].status === "已完成") {
                     roleRespUnFinished.data.splice(i, 1)
                     i--
@@ -184,19 +187,16 @@ async function sendRoleRespToPage() {
             }
             pageStore.roleRespUnFinished = roleRespUnFinished
 
-            // 未完成任务的数量
-            roleNumber.value = roleRespUnFinished.data.length
-
-            if (roleResp.code === 1) {
-                console.log("没有任务")
-            } else {
+            if (roleRespUnFinished.data.length !== 0) {
+                // 未完成任务的数量
+                roleNumber.value = roleRespUnFinished.data.length
                 console.log("有任务")
-                pageStore.roleResp = roleResp
                 haveRole.value = true
                 notHaveRole.value = false
+            } else {
+                console.log("没有任务")
             }
-
-
+            pageStore.roleResp = roleResp
         })
 }
 
