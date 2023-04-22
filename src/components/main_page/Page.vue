@@ -22,16 +22,17 @@
                     <a class="btn btn-ghost normal-case text-xl">File-collection</a>
                 </div>
                 <div class="navbar-end">
-                    <button class="btn btn-ghost btn-circle">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"/>
-                        </svg>
-                    </button>
+<!--                    search button-->
+<!--                    <button class="btn btn-ghost btn-circle">-->
+<!--                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"-->
+<!--                             xmlns="http://www.w3.org/2000/svg">-->
+<!--                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round"-->
+<!--                                  stroke-linejoin="round"-->
+<!--                                  stroke-width="2"/>-->
+<!--                        </svg>-->
+<!--                    </button>-->
                     <label class="btn btn-ghost btn-circle avatar" tabindex="0">
-                        <div class="w-10 rounded-full">
+                        <div @click="goToTest" class="w-10 rounded-full">
                             <img alt="img" src=""/>
                         </div>
                     </label>
@@ -119,11 +120,27 @@ import {onBeforeMount, reactive, ref} from "vue";
 import Submit from "./home/Submit.vue";
 import axios from "axios";
 import Worklist from "./home/Worklist.vue";
+import {useTestStore} from "../../stores/test.js";
+import router from "../../router/index.js";
 
+const testStore = useTestStore()
 const homeStore = useHomeStore()
 const pageStore = usePageStore()
 
 let classId = ref("")
+
+// todo 测试 async + axios + router
+const goToTest = async () => {
+    let stu_id = JSON.parse(localStorage.getItem("userInfo")).stu_id
+    await axios.post("/path/api/classsearch", {
+        stu_id
+    }).then( ({data}) => {
+        console.log(data)
+        testStore.testValue = data
+    })
+    console.log("in page.vue: " ,  testStore.testValue)
+    await router.push({path: '/test'})
+}
 
 function addToClass() {
     let stuId = JSON.parse(localStorage.getItem("userInfo"))
@@ -214,10 +231,4 @@ function goToMyRole() {
 function goToPublished() {
     pageStore.publishChange()
 }
-
-// function classManage() {
-//     homeStore.push({path: '/class_manage'})
-// }
-
-
 </script>

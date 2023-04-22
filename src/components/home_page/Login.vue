@@ -53,8 +53,8 @@
                             <label class="label">
                                 <span class="label-text">password</span>
                             </label>
-                            <input v-model="data.password" class="input input-bordered" placeholder="password"
-                                   type="text"/>
+                            <input @keyup.enter="Login" v-model="data.password" class="input input-bordered" placeholder="password"
+                                   type="password"/>
                             <label class="label">
                                 <!--                                open label-->
                                 <label class="label-text-alt link link-hover" for="register">Sign Up</label>
@@ -188,6 +188,8 @@ function homeInfo(returnValue, noRoute) {
     }
 
 }
+
+
 
 watch(
     () => data.stu_id,
