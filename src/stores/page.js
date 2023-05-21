@@ -37,7 +37,7 @@ export const usePageStore = defineStore("pageStore",() => {
 
     // 文件上传
     async function fileUpload(respObj, form) {
-        // todo change this interface, add /api, not test
+        // todo change this interface, add /api, not information
         let url = `/path/api/upload/${respObj.class_id}/${respObj.stu_id}/${respObj.course_id}`
         await axios.post(url, form).then(
             ({data}) => {

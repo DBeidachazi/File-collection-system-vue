@@ -33,7 +33,7 @@
 <!--                    </button>-->
                     <label class="btn btn-ghost btn-circle avatar" tabindex="0">
                         <div @click="goToTest" class="w-10 rounded-full">
-                            <img alt="img" src=""/>
+                            <img alt="img" src="https://daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg"/>
                         </div>
                     </label>
                 </div>
@@ -139,7 +139,7 @@ const goToTest = async () => {
         testStore.testValue = data
     })
     console.log("in page.vue: " ,  testStore.testValue)
-    await router.push({path: '/test'})
+    await router.push({path: '/information'})
 }
 
 function addToClass() {

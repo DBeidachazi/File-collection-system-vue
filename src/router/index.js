@@ -32,7 +32,7 @@ const routes = [
         component: () => import('../components/main_page/Class.vue')
     },
     {
-        path: '/test',
+        path: '/information',
         name: 'test',
         component: () => import('../view/TestView.vue')
     }
